@@ -17,7 +17,7 @@ private:
     std::thread m_thread;
     bool m_stop;
 public:
-    explicit Wifibot(const Order &mOrder);
+    Wifibot();
 
     void stop();
     void speed_up();

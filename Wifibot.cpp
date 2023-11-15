@@ -5,7 +5,12 @@
 #include "Wifibot.h"
 using namespace std;
 
-Wifibot::Wifibot(const Order &mOrder) : m_order(mOrder) {}
+Wifibot::Wifibot() :
+        m_order(0, 0, true),
+        m_stop(false),
+        m_thread([this]() { run(); }) {
+    // Additional constructor logic, if needed
+}
 
 void Wifibot::stop() {
     m_order.set_Order(0,0);
