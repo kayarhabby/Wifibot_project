@@ -43,5 +43,12 @@ int main() {
     cout << "Réduction de vitesse." << endl;
     myWifibot.displayAttribut();
 
+
+// thread part
+    for(int i=0; i<30; i++) {
+        std::cout << "Thread [main]" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
     return 0;
 }
