@@ -73,3 +73,20 @@ void Wifibot::displayAttribut() {
     else
         cout << "contôle de vitèsse : " << "false" << endl;
 }
+
+void Wifibot::run() {
+    static int cpt;
+    while(!m_stop) {
+        std::cout << "Thread [send] : " << ++cpt << std::endl;
+//
+// Code de l’émission de la trame
+//
+        std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
+    }
+// #define LOOP_TIME 200 dans wifibot.h
+    std::cout << "Thread [send] : stop!" << std::endl << std::endl;
+}
+
+Wifibot::~Wifibot() {
+    m_stop = true;
+}

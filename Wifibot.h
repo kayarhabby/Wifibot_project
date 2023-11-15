@@ -4,7 +4,7 @@
 
 #ifndef PROJET_WIFIBOT_WIFIBOT_H
 #define PROJET_WIFIBOT_WIFIBOT_H
-
+#define LOOP_TIME 200
 
 #include "Order.h"
 #include<unistd.h>
@@ -26,6 +26,7 @@ public:
     void rotate (int direction) ;
 
     void displayAttribut();
+    ~Wifibot();
 
 private:
     void run();
