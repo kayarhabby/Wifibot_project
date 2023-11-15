@@ -14,18 +14,20 @@
 class Wifibot {
 private:
     Order m_order;
-    std::thread m_thread;
+    std::thread* m_p_thread;
     bool m_stop;
 public:
     Wifibot();
 
-    void stop();
+    void stop(); // Méthode pour arrêter le thread
+    void start();  // Méthode pour démarrer le thread
     void speed_up();
     void speed_down();
     void turn(int direction);
     void rotate (int direction) ;
 
     void displayAttribut();
+
     ~Wifibot();
 
 private:

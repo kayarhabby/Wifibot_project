@@ -8,13 +8,10 @@ using namespace std;
 Wifibot::Wifibot() :
         m_order(0, 0, true),
         m_stop(false),
-        m_thread([this]() { run(); }) {
+        m_p_thread(nullptr) {
     // Additional constructor logic, if needed
 }
 
-void Wifibot::stop() {
-    m_order.set_Order(0,0);
-}
 void Wifibot::speed_up(){
     m_order.set_Order(m_order.get_order_L() + 5 ,m_order.get_order_R() + 5 );
 }
@@ -87,6 +84,19 @@ void Wifibot::run() {
     std::cout << "Thread [send] : stop!" << std::endl << std::endl;
 }
 
+void Wifibot::start() {
+    m_p_thread = new std::thread([this]() { run(); });
+}
+
+void Wifibot::stop() {
+    if (m_p_thread && m_p_thread->joinable()) {
+        m_stop = true;
+        m_p_thread->join();
+        delete m_p_thread;  // Libérez la mémoire allouée pour le thread
+        m_p_thread = nullptr;
+    }
+}
+
 Wifibot::~Wifibot() {
-    m_stop = true;
+    stop();  // Assurez-vous d'arrêter le thread avant la destruction de l'objet
 }
