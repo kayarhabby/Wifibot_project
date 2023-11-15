@@ -4,11 +4,9 @@
 using namespace std;
 
 int main() {
-    // Créez un objet Order avec des valeurs initiales
-    Order order(0, 0, true);
 
     // Créez un objet Wifibot en utilisant l'objet Order
-    Wifibot myWifibot(order);
+    Wifibot myWifibot;
 
     // Démarrez le robot avec une vitesse initiale
     myWifibot.speed_up();
