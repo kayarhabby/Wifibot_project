@@ -7,6 +7,7 @@
 #define LOOP_TIME 200
 
 #include "Order.h"
+#include "socket.h"
 #include<unistd.h>
 #include <iostream>
 #include <thread>
@@ -16,8 +17,10 @@ private:
     Order m_order;
     std::thread* m_p_thread;
     bool m_stop;
+    Socket_TCP m_socket;
 public:
     Wifibot();
+    ~Wifibot();
 
     void stop(); // Méthode pour arrêter le thread
     void start();  // Méthode pour démarrer le thread
@@ -27,8 +30,10 @@ public:
     void rotate (int direction) ;
 
     void displayAttribut();
+    void connect(std::string);
+    void disconnect();
 
-    ~Wifibot();
+
 
 private:
     void run();

@@ -8,7 +8,8 @@ using namespace std;
 Wifibot::Wifibot() :
         m_order(0, 0, true),
         m_stop(false),
-        m_p_thread(nullptr) {
+        m_p_thread(nullptr),
+        m_socket() {
     // Additional constructor logic, if needed
 }
 
@@ -78,6 +79,7 @@ void Wifibot::run() {
 //
 // Code de l’émission de la trame
 //
+        m_socket.send("Hello World !");
         std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
     }
 // #define LOOP_TIME 200 dans wifibot.h
@@ -98,5 +100,18 @@ void Wifibot::stop() {
 }
 
 Wifibot::~Wifibot() {
-    stop();  // Assurez-vous d'arrêter le thread avant la destruction de l'objet
+    disconnect();
+}
+
+void Wifibot::connect(string ip) {
+    // ouverture du socket avec comme Ip 127.0.0.1 et le port d’écoute.
+    m_socket.open(ip,15020);
+    if(m_socket.is_open()){
+        start();
+    }
+}
+
+void Wifibot::disconnect() {
+    stop();
+    m_socket.close();
 }
