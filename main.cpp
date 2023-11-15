@@ -1,9 +1,10 @@
 #include "Wifibot.h"
+#include <gtkmm.h>
 #include <iostream>
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
 
     // Créez un objet Wifibot en utilisant l'objet Order
     Wifibot myWifibot;
@@ -43,18 +44,30 @@ int main() {
     cout << "Réduction de vitesse." << endl;
     myWifibot.displayAttribut();
 
-    // Démarrer le thread
-    myWifibot.start();
+//    // Démarrer le thread
+//    myWifibot.start();
+//
+//
+//    // thread part
+//    for(int i=0; i<10; i++) {
+//        std::cout << "Thread [main]" << std::endl;
+//        std::this_thread::sleep_for(std::chrono::seconds(1));
+//    }
+//
+//    // Arrêter le thread
+//    myWifibot.stop();
 
+    Gio::init();
+    // Initialisation obligatoire des bibliothèques : Gio et Glib
+    Glib::init(); // Inutile en lançant une interface graphique avec Gtk::Main et
+    // Gtk::Window
 
-    // thread part
-    for(int i=0; i<10; i++) {
+    myWifibot.connect("127.0.0.1");
+    for(int i=0; i<30; i++) {
         std::cout << "Thread [main]" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-
-    // Arrêter le thread
-    myWifibot.stop();
+    myWifibot.disconnect();
 
     return 0;
 }
