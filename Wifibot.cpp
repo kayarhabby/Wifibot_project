@@ -74,17 +74,61 @@ void Wifibot::displayAttribut() {
 
 void Wifibot::run() {
     static int cpt;
+    char trame[9];
     while(!m_stop) {
         std::cout << "Thread [send] : " << ++cpt << std::endl;
 //
 // Code de l’émission de la trame
 //
+        trame[1] = 0xff;
+        trame[2] = 0x07;
+        // left speed
+        trame[3] = 0;
+        trame[4] = 0;
+        //right speed
+        trame[5] = 0;
+        trame[6] = 0;
+        // is the Left / Right speed command flag : Forward / Backward and speed control left & right ON
+        // OFF.
+        trame[7] = 0;
+
+        // crc16
+
+        trame[8] = crc16;
+        trame[9] = crc16;
+
+
+
         m_socket.send("Hello World !");
         std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
     }
 // #define LOOP_TIME 200 dans wifibot.h
     std::cout << "Thread [send] : stop!" << std::endl << std::endl;
 }
+
+// crc16
+
+unsigned short Wifibot::crc16(const std::string& frame) {
+    unsigned short crc = 0xFFFF;
+    unsigned int i = 0;
+
+    do {
+        unsigned char octet = frame[i];
+        crc ^= octet;
+
+        for (int j = 0; j < 8; ++j) {
+            if (crc & 1)
+                crc = (crc >> 1) ^ POLYNOME;
+            else
+                crc >>= 1;
+        }
+
+        i++;
+    } while (i < frame.length());
+
+    return crc;
+}
+
 
 void Wifibot::start() {
     m_p_thread = new std::thread([this]() { run(); });
@@ -115,3 +159,4 @@ void Wifibot::disconnect() {
     stop();
     m_socket.close();
 }
+

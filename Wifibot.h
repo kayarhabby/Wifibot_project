@@ -11,6 +11,7 @@
 #include<unistd.h>
 #include <iostream>
 #include <thread>
+const int POLYNOME = 0xA001;
 
 class Wifibot {
 private:
@@ -32,6 +33,7 @@ public:
     void displayAttribut();
     void connect(std::string);
     void disconnect();
+    unsigned short crc16(const std::string& frame);
 
 
 
