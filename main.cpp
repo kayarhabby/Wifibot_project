@@ -39,10 +39,17 @@ int main(int argc, char* argv[]) {
     cout << "Rotation antihoraire." << endl;
     myWifibot.displayAttribut();
 
-    // Réduisez la vitesse du robot
-    myWifibot.speed_down();
-    cout << "Réduction de vitesse." << endl;
+    // Démarrez le robot avec une vitesse initiale
+    myWifibot.speed_up();
+    cout << "Robot en accélération." << endl;
     myWifibot.displayAttribut();
+
+    // Démarrez le robot avec une vitesse initiale
+    myWifibot.speed_up();
+    cout << "Robot en accélération." << endl;
+    myWifibot.displayAttribut();
+
+
 
 //    // Démarrer le thread
 //    myWifibot.start();
