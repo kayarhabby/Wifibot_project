@@ -32,7 +32,7 @@ public:
     void displayAttribut();
     void connect(std::string);
     void disconnect();
-    short crc16(const char* trame, short length);
+    unsigned short crc16(const char* trame, unsigned short length);
 
 
 

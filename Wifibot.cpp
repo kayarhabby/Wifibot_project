@@ -82,25 +82,17 @@ void Wifibot::run() {
         char char1 = 0xFF;
         char char2 = 0x07;
 
-        // Convert to network byte order (big-endian)
-        short leftSpeed = htons(m_order.get_order_L());
-        short rightSpeed = htons(m_order.get_order_R());
-
-        char char3 = leftSpeed & 0xFF;
-        char char4 = (leftSpeed >> 8) & 0xFF;
-        char char5 = rightSpeed & 0xFF;
-        char char6 = (rightSpeed >> 8) & 0xFF;
+        char char3 = m_order.get_order_L() & 0xFF;
+        char char4 = (m_order.get_order_L() >> 8) & 0xFF;
+        char char5 = m_order.get_order_R() & 0xFF;
+        char char6 = (m_order.get_order_R() >> 8) & 0xFF;
 
         // Construct char7
-        char char7 = 0;
-        char7 |= (1 << 7);  // Left Side Closed Loop Speed control :: 1 -> ON
-        char7 |= (1 << 6);  // Left Side Forward :: 1 -> Forward
-        char7 |= (1 << 5);  // Right Side Closed Loop Speed control :: 1 -> ON
-        char7 |= (1 << 4);  // Right Side Forward :: 1 -> Forward
-        char7 |= (1 << 3);  // Relay 4 On/Off
-        char7 |= (1 << 2);  // Relay 3 On/Off
-        char7 |= (1 << 1);  // Relay 2 On/Off
-        char7 |= (1 << 0);  // Relay 1 On/Off
+        unsigned char char7 = 0;
+        char7 |= (m_order.get_speed_ctr() ? (1 << 7) : 0);  // Left Side Closed Loop Speed control :: 1 -> ON
+        char7 |= (m_order.get_order_L() ? (1 << 6) : 0);  // Left Side Forward :: 1 -> Forward
+        char7 |= (m_order.get_speed_ctr() ? (1 << 5) : 0);  // Right Side Closed Loop Speed control :: 1 -> ON
+        char7 |= (m_order.get_order_R() ? (1 << 4) : 0);  // Right Side Forward :: 1 -> Forward
 
         // Construct chars 8-9 (CRC16)
         trame[0] = char1;
@@ -111,14 +103,23 @@ void Wifibot::run() {
         trame[5] = char6;
         trame[6] = char7;
 
-        short crc16_value = crc16(trame, 7);  // CRC16 calculation on chars 1-7
+        unsigned short crc16_value = crc16(trame, 7);  // CRC16 calculation on chars 1-7
         trame[7] = static_cast<char>(crc16_value & 0xFF);  // Low byte
         trame[8] = static_cast<char>((crc16_value >> 8) & 0xFF);  // High byte
 
-        std::cout << "Thread [send] : " << ++cpt << std::endl;
+        cout << "Thread [send] : " << ++cpt << endl;
         // Code d'émission de la trame
+        cout << "char1 " << static_cast<int> (char1)<< endl;
+        cout << "char2 " << static_cast<int>(char2) << endl;
+        cout << "char3 " << static_cast<int>(char3) << endl;
+        cout << "char4 " << static_cast<int>(char4) << endl;
+        cout << "char5 " << static_cast<int>(char5) << endl;
+        cout << "char6 " << static_cast<int>(char6) << endl;
+        cout << "char7 " << static_cast<int>(char7) << endl;
+        cout << "crc16 " << crc16_value << endl;
         m_socket.send(trame,9);
-        std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
+        //m_socket.send("Hello World!");
+        this_thread::sleep_for(chrono::milliseconds(LOOP_TIME));
     }
 
     std::cout << "Thread [send] : stop!" << std::endl << std::endl;
@@ -128,10 +129,10 @@ void Wifibot::run() {
 
 // crc16
 
-short Wifibot::crc16(const char* trame, short length) {
-    short crc = 0xFFFF;
+unsigned short Wifibot::crc16(const char* trame, unsigned short length) {
+    unsigned short crc = 0xFFFF;
 
-    for (short k = 0; k < length; k++) {
+    for (unsigned short k = 0; k < length; k++) {
         char octet = trame[k];
         crc ^= octet;
 
