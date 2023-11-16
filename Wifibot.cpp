@@ -117,7 +117,7 @@ void Wifibot::run() {
 
         std::cout << "Thread [send] : " << ++cpt << std::endl;
         // Code d'émission de la trame
-        m_socket.send(trame,size(trame))
+        m_socket.send(trame,9);
         std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
     }
 
@@ -146,11 +146,6 @@ short Wifibot::crc16(const char* trame, short length) {
     return crc;
 }
 
-
-void Wifibot::start() {
-    m_p_thread = new std::thread([this]() { run(); });
-}
-
 void Wifibot::stop() {
     if (m_p_thread && m_p_thread->joinable()) {
         m_stop = true;
@@ -168,7 +163,7 @@ void Wifibot::connect(string ip) {
     // ouverture du socket avec comme Ip 127.0.0.1 et le port d’écoute.
     m_socket.open(ip,15020);
     if(m_socket.is_open()){
-        start();
+        m_p_thread = new std::thread([this]() { run(); });
     }
 }
 

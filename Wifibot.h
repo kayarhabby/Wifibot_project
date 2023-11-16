@@ -24,7 +24,6 @@ public:
     ~Wifibot();
 
     void stop(); // Méthode pour arrêter le thread
-    void start();  // Méthode pour démarrer le thread
     void speed_up();
     void speed_down();
     void turn(int direction);
