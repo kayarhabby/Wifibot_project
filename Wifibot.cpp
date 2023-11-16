@@ -2,6 +2,7 @@
 // Created by kaya on 06/11/23.
 //
 
+#include <netinet/in.h>
 #include "Wifibot.h"
 using namespace std;
 
@@ -73,58 +74,74 @@ void Wifibot::displayAttribut() {
 }
 
 void Wifibot::run() {
-    static int cpt;
-    char trame[9];
-    while(!m_stop) {
+    static int cpt = 0;
+
+    while (!m_stop) {
+        char trame[9];
+
+        char char1 = 0xFF;
+        char char2 = 0x07;
+
+        // Convert to network byte order (big-endian)
+        short leftSpeed = htons(m_order.get_order_L());
+        short rightSpeed = htons(m_order.get_order_R());
+
+        char char3 = leftSpeed & 0xFF;
+        char char4 = (leftSpeed >> 8) & 0xFF;
+        char char5 = rightSpeed & 0xFF;
+        char char6 = (rightSpeed >> 8) & 0xFF;
+
+        // Construct char7
+        char char7 = 0;
+        char7 |= (1 << 7);  // Left Side Closed Loop Speed control :: 1 -> ON
+        char7 |= (1 << 6);  // Left Side Forward :: 1 -> Forward
+        char7 |= (1 << 5);  // Right Side Closed Loop Speed control :: 1 -> ON
+        char7 |= (1 << 4);  // Right Side Forward :: 1 -> Forward
+        char7 |= (1 << 3);  // Relay 4 On/Off
+        char7 |= (1 << 2);  // Relay 3 On/Off
+        char7 |= (1 << 1);  // Relay 2 On/Off
+        char7 |= (1 << 0);  // Relay 1 On/Off
+
+        // Construct chars 8-9 (CRC16)
+        trame[0] = char1;
+        trame[1] = char2;
+        trame[2] = char3;
+        trame[3] = char4;
+        trame[4] = char5;
+        trame[5] = char6;
+        trame[6] = char7;
+
+        short crc16_value = crc16(trame, 7);  // CRC16 calculation on chars 1-7
+        trame[7] = static_cast<char>(crc16_value & 0xFF);  // Low byte
+        trame[8] = static_cast<char>((crc16_value >> 8) & 0xFF);  // High byte
+
         std::cout << "Thread [send] : " << ++cpt << std::endl;
-//
-// Code de l’émission de la trame
-//
-        trame[1] = 0xff;
-        trame[2] = 0x07;
-        // left speed
-        trame[3] = 0;
-        trame[4] = 0;
-        //right speed
-        trame[5] = 0;
-        trame[6] = 0;
-        // is the Left / Right speed command flag : Forward / Backward and speed control left & right ON
-        // OFF.
-        trame[7] = 0;
-
-        // crc16
-
-        trame[8] = crc16;
-        trame[9] = crc16;
-
-
-
-        m_socket.send("Hello World !");
+        // Code d'émission de la trame
+        m_socket.send(trame,size(trame))
         std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
     }
-// #define LOOP_TIME 200 dans wifibot.h
+
     std::cout << "Thread [send] : stop!" << std::endl << std::endl;
 }
 
+
+
 // crc16
 
-unsigned short Wifibot::crc16(const std::string& frame) {
-    unsigned short crc = 0xFFFF;
-    unsigned int i = 0;
+short Wifibot::crc16(const char* trame, short length) {
+    short crc = 0xFFFF;
 
-    do {
-        unsigned char octet = frame[i];
+    for (short k = 0; k < length; k++) {
+        char octet = trame[k];
         crc ^= octet;
 
-        for (int j = 0; j < 8; ++j) {
+        for (int i = 0; i < 8; ++i) {
             if (crc & 1)
                 crc = (crc >> 1) ^ POLYNOME;
             else
                 crc >>= 1;
         }
-
-        i++;
-    } while (i < frame.length());
+    }
 
     return crc;
 }
