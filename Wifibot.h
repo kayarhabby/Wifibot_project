@@ -34,6 +34,8 @@ public:
     void disconnect();
     unsigned short crc16(const char* trame, unsigned short length);
 
+    void setSpeed(short speed);
+
 
 
 private:
