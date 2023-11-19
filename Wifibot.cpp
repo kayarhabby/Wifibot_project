@@ -21,26 +21,18 @@ void Wifibot::speed_down(){
     m_order.set_Order(m_order.get_order_L() - 5,m_order.get_order_R() - 5);
 }
 void Wifibot::turn(int direction) {
-    // Obtenir les ordres gauche et droit
-    short left = m_order.get_order_L();
-    short right = m_order.get_order_R();
 
     // Calculer la consigne pour les deux moteurs (20% des ordres)
-    short consigne_L = 0.2 * left;
-    short consigne_R = 0.2 * right;
+    short consigne_L = 0.2 * m_order.get_order_L();
+    short consigne_R = 0.2 * m_order.get_order_R();
 
     if (direction == 1) {
         // Tourner vers la gauche en augmentant la consigne du moteur gauche
-        m_order.set_Order(left + consigne_L, right - consigne_R);
+        m_order.set_Order(m_order.get_order_L()+ consigne_L, m_order.get_order_R() - consigne_R);
     } else if (direction == -1) {
         // Tourner vers la droite en diminuant la consigne du moteur gauche
-        m_order.set_Order(left - consigne_L, right + consigne_R);
+        m_order.set_Order(m_order.get_order_L() - consigne_L, m_order.get_order_R() + consigne_R);
     }
-
-    /**
-     *  faire la moyenne des deux vitèsses et les données aux roues après turn
-     *  reste à implémenter
-     */
 
     int moy_vitesse =  (m_order.get_order_R() + m_order.get_order_L()) / 2;
 
@@ -48,15 +40,19 @@ void Wifibot::turn(int direction) {
 }
 
 void Wifibot::rotate (int direction){
+    // arrêt du robot
+
+    stop();
+
     //temporisation d'une seconde
     usleep(1000);
 
     if (direction == 1) {
         // Tourner dans le sens horaire
-        m_order.set_Order(-10, 10);
+        m_order.set_Order(10, -10);
     } else if (direction == -1) {
         // Tourner le sens trigonométrique
-        m_order.set_Order(10, -10);
+        m_order.set_Order(-10, 10);
     }
 
 }
@@ -132,7 +128,7 @@ void Wifibot::run() {
 unsigned short Wifibot::crc16(const char* trame, unsigned short length) {
     unsigned short crc = 0xFFFF;
 
-    for (unsigned short k = 0; k < length; k++) {
+    for (unsigned short k = 1; k < length; k++) {
         char octet = trame[k];
         crc ^= octet;
 
