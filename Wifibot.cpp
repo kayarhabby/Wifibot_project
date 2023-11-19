@@ -148,12 +148,7 @@ unsigned short Wifibot::crc16(const char* trame, unsigned short length) {
 }
 
 void Wifibot::stop() {
-    if (m_p_thread && m_p_thread->joinable()) {
-        m_stop = true;
-        m_p_thread->join();
-        delete m_p_thread;  // Libérez la mémoire allouée pour le thread
-        m_p_thread = nullptr;
-    }
+  m_order.set_Order(0,0);
 }
 
 Wifibot::~Wifibot() {
@@ -164,12 +159,17 @@ void Wifibot::connect(string ip) {
     // ouverture du socket avec comme Ip 127.0.0.1 et le port d’écoute.
     m_socket.open(ip,15020);
     if(m_socket.is_open()){
-        m_p_thread = new std::thread([this]() { run(); });
+        m_p_thread = new std::thread([this](){ run(); });
     }
 }
 
 void Wifibot::disconnect() {
-    stop();
+    if (m_p_thread && m_p_thread->joinable()) {
+        m_stop = true;
+        m_p_thread->join();
+        delete m_p_thread;  // Libérez la mémoire allouée pour le thread
+        m_p_thread = nullptr;
+    }
     m_socket.close();
 }
 
