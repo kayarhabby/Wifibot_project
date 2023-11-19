@@ -13,7 +13,7 @@ Gui::Gui() : m_button_stop("STOP"), m_entry(), m_button_connexion("Connexion"), 
     this->set_border_width(10);
 
     // Frame 1: Text entry and connection button
-    m_Frame1.set_label("Frame1 Widget");
+    m_Frame1.set_label("Connexion");
     hbox1.set_homogeneous(true);
 
     m_entry.set_max_length(50);
@@ -24,9 +24,17 @@ Gui::Gui() : m_button_stop("STOP"), m_entry(), m_button_connexion("Connexion"), 
     m_Frame1.add(hbox1);
     vbox.pack_start(m_Frame1, Gtk::PACK_SHRINK);
 
-    // Frame 2 : Image et grille de boutons
-    m_Frame2.set_label("Frame2 Widget");
+    // Frame 3: Speed control
+    m_Frame3.set_label("Speed Control");
+    m_speedSlider.set_range(-40, 40); // Set the range according to your speed values
+    m_speedSlider.set_inverted(true); // Adjust this if the direction of speed change is inverted
+    m_speedSlider.set_value(0); // Set an initial value
+    m_speedSlider.set_size_request(50, 200); // Adjust size as needed
+    m_Frame3.add(m_speedSlider);
+    vbox.pack_start(m_Frame3, Gtk::PACK_SHRINK);
 
+    // Frame 2 : Image et grille de boutons
+    m_Frame2.set_label("Control robot");
     configureImage("image/wifibot.png",m_image);
 
     // Boutons avec images
@@ -40,13 +48,13 @@ Gui::Gui() : m_button_stop("STOP"), m_entry(), m_button_connexion("Connexion"), 
 // Ajoutez les boutons à la grille
 
     grid.attach(m_image, 0, 0, 1, 4);  // Image
-    grid.attach(button_up_arrow, 1, 0, 3, 1);  // Bouton 1
-    grid.attach(button_left_arrow, 1, 1, 1, 1);  // Bouton 2
-    grid.attach(button_right_arrow, 2, 1, 2, 1);  // Bouton 3
-    grid.attach(button_down_arrow, 2, 2, 1, 1);  // Bouton 4
-    grid.attach(button_spin_left_arrow, 1, 2, 1, 1);  // Bouton 5
-    grid.attach(button_spin_right_arrow, 3, 2, 1, 1);  // Bouton 6
-    grid.attach(m_button_stop, 1, 3, 3, 1);   // Bouton 7
+    grid.attach(button_up_arrow, 1, 0, 6, 1);  // Bouton 1
+    grid.attach(button_left_arrow, 1, 1, 3, 1);  // Bouton 2
+    grid.attach(button_right_arrow, 4, 1, 3, 1);  // Bouton 3
+    grid.attach(button_down_arrow, 3, 2, 2, 1);  // Bouton 4
+    grid.attach(button_spin_left_arrow, 1, 2, 2, 1);  // Bouton 5
+    grid.attach(button_spin_right_arrow, 5, 2, 2, 1);  // Bouton 6
+    grid.attach(m_button_stop, 1, 3, 6, 1);   // Bouton 7
 
     vbox.pack_end(grid, Gtk::PACK_EXPAND_WIDGET);
 
@@ -112,7 +120,13 @@ Gui::Gui() : m_button_stop("STOP"), m_entry(), m_button_connexion("Connexion"), 
         m_robot.displayAttribut();
     });
 
-
+    // Connect the signal handler for value changes in the slider
+    m_speedSlider.signal_value_changed().connect([this]() {
+        // Code to update WifiBot speed based on slider value
+        short speed = m_speedSlider.get_value();
+        m_robot.setSpeed(speed); // Replace setSpeed with the actual method to update speed
+        std::cout << "Speed changed to: " << speed << std::endl;
+    });
 
 }
 
