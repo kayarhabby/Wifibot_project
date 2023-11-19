@@ -69,6 +69,10 @@ void Wifibot::displayAttribut() {
         cout << "contôle de vitèsse : " << "false" << endl;
 }
 
+void Wifibot::setSpeed(short speed) {
+    m_order.set_Order(speed,speed);
+}
+
 void Wifibot::run() {
     static int cpt = 0;
 
