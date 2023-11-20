@@ -12,13 +12,14 @@
 #include "Wifibot.h"
 
 class Gui : public Gtk::Window { // La classe Gui hérite de la classe Gtk::Window
-public:
-    Gui(); // Constructeur
-    ~Gui(); // Destructeur
-    void configureButton(Gtk::Button& button, const std::string& filename, Gtk::Image& image);
-    void configureImage(const std::string& filename, Gtk::Image& image);
+
+private:
+    Gtk::Button m_button_stop; // Déclaration de l’objet membre m_button_1 du type Gtk::Button
+    Gtk::Button m_button_connexion;
+    Wifibot m_robot;
 
 protected:
+    Gtk::Entry m_entry;
 
     //Child widgets:
     Gtk::Frame m_Frame1;
@@ -28,29 +29,39 @@ protected:
     Gtk::HBox hbox1;
     Gtk::HBox hbox2;
 
-    Gtk::Image m_image;
-    Gtk::Image m_image1;
-    Gtk::Image m_image2;
-    Gtk::Image m_image3;
-    Gtk::Image m_image4;
-    Gtk::Image m_image5;
-    Gtk::Image m_image6;
-
     Gtk::Button button_up_arrow;
     Gtk::Button button_left_arrow;
     Gtk::Button button_right_arrow;
     Gtk::Button button_down_arrow;
     Gtk::Button button_spin_left_arrow;
     Gtk::Button button_spin_right_arrow;
+    Gtk::Image m_image;
+
     // Grille de boutons
     Gtk::Grid grid;
     Gtk::VScale m_speedSlider;
-private:
-    Gtk::Button m_button_stop; // Déclaration de l’objet membre m_button_1 du type Gtk::Button
-    Gtk::Entry m_entry;
-    Gtk::Button m_button_connexion;
-    Wifibot m_robot;
 
+public:
+    /**
+     * constructeur de la classe Gui
+     */
+    Gui();
+    /**
+     * destructeur de la classe Gui
+     */
+    ~Gui();
+    /**
+     * permet de remplir les boutons avec les images de direction
+     * @param button bouton
+     * @param filename Nom de l'image
+     */
+    void configureButton(Gtk::Button& button, const std::string& filename);
+    /**
+     * permet d'initialiser l'image du wifibot
+     * @param filename nom de l'image du wifibot
+     * @return image initialisé
+     */
+    Gtk::Image configureImage(const std::string& filename);
 
 };
 
