@@ -4,15 +4,17 @@
 
 #include "Gui.h"
 
-Gui::Gui() : m_button_stop("STOP"), m_entry(), m_button_connexion("Connexion"), m_robot()
+Gui::Gui() : m_button_stop("STOP"), m_button_connexion("Connexion"), m_robot()
 
 {
     // Positionnement et redimensionnement de la fenêtre principale
+
     this->set_title("Wifibot");
     this->set_position(Gtk::WIN_POS_CENTER);
     this->set_border_width(10);
 
     // Frame 1: Text entry and connection button
+
     m_Frame1.set_label("Connexion");
     hbox1.set_homogeneous(true);
 
@@ -26,35 +28,37 @@ Gui::Gui() : m_button_stop("STOP"), m_entry(), m_button_connexion("Connexion"), 
 
     // Frame 3: Speed control
     m_Frame3.set_label("Speed Control");
-    m_speedSlider.set_range(-40, 40); // Set the range according to your speed values
-    m_speedSlider.set_inverted(true); // Adjust this if the direction of speed change is inverted
-    m_speedSlider.set_value(0); // Set an initial value
-    m_speedSlider.set_size_request(50, 200); // Adjust size as needed
+    m_speedSlider.set_range(-40, 40); // intervalle de valeur souhaité
+    m_speedSlider.set_inverted(true);
+    m_speedSlider.set_value(0); //valeur initial
+    m_speedSlider.set_size_request(50, 200); // taille du vscale
     m_Frame3.add(m_speedSlider);
     vbox.pack_start(m_Frame3, Gtk::PACK_SHRINK);
 
     // Frame 2 : Image et grille de boutons
+
     m_Frame2.set_label("Control robot");
-    configureImage("image/wifibot.png",m_image);
+    m_image = configureImage("image/wifibot.png");
 
     // Boutons avec images
-    configureButton(button_up_arrow, "image/up_arrow.png",m_image1);
-    configureButton(button_left_arrow, "image/left_arrow.png",m_image2);
-    configureButton(button_right_arrow, "image/right_arrow.png",m_image3);
-    configureButton(button_down_arrow, "image/down_arrow.png",m_image4);
-    configureButton(button_spin_left_arrow, "image/spin_left_arrow.png",m_image5);
-    configureButton(button_spin_right_arrow, "image/spin_right_arrow.png",m_image6);
+
+    configureButton(button_up_arrow, "image/up_arrow.png");
+    configureButton(button_left_arrow, "image/left_arrow.png");
+    configureButton(button_right_arrow, "image/right_arrow.png");
+    configureButton(button_down_arrow, "image/down_arrow.png");
+    configureButton(button_spin_left_arrow, "image/spin_left_arrow.png");
+    configureButton(button_spin_right_arrow, "image/spin_right_arrow.png");
 
 // Ajoutez les boutons à la grille
 
-    grid.attach(m_image, 0, 0, 1, 4);  // Image
-    grid.attach(button_up_arrow, 1, 0, 6, 1);  // Bouton 1
-    grid.attach(button_left_arrow, 1, 1, 3, 1);  // Bouton 2
-    grid.attach(button_right_arrow, 4, 1, 3, 1);  // Bouton 3
-    grid.attach(button_down_arrow, 3, 2, 2, 1);  // Bouton 4
-    grid.attach(button_spin_left_arrow, 1, 2, 2, 1);  // Bouton 5
-    grid.attach(button_spin_right_arrow, 5, 2, 2, 1);  // Bouton 6
-    grid.attach(m_button_stop, 1, 3, 6, 1);   // Bouton 7
+    grid.attach(m_image, 0, 0, 1, 4);
+    grid.attach(button_up_arrow, 1, 0, 6, 1);
+    grid.attach(button_left_arrow, 1, 1, 3, 1);
+    grid.attach(button_right_arrow, 4, 1, 3, 1);
+    grid.attach(button_down_arrow, 3, 2, 2, 1);
+    grid.attach(button_spin_left_arrow, 1, 2, 2, 1);
+    grid.attach(button_spin_right_arrow, 5, 2, 2, 1);
+    grid.attach(m_button_stop, 1, 3, 6, 1);
 
     vbox.pack_end(grid, Gtk::PACK_EXPAND_WIDGET);
 
@@ -84,6 +88,7 @@ Gui::Gui() : m_button_stop("STOP"), m_entry(), m_button_connexion("Connexion"), 
     });
 
     // Gestion de l'événement clique sur les boutons de directions
+
     button_up_arrow.signal_clicked().connect([this](){
         std::cout << "speed_up" << std::endl;
         m_robot.speed_up();
@@ -130,23 +135,27 @@ Gui::Gui() : m_button_stop("STOP"), m_entry(), m_button_connexion("Connexion"), 
 
 }
 
-void Gui::configureButton(Gtk::Button& button, const std::string& filename, Gtk::Image& image) {
+void Gui::configureButton(Gtk::Button& button, const std::string& filename) {
     try {
         auto pixbuf = Gdk::Pixbuf::create_from_file(filename)->scale_simple(50, 50, Gdk::INTERP_BILINEAR);
-        image.set(pixbuf);
-        button.set_image(image);
+        Gtk::Image* image = Gtk::manage(new Gtk::Image());
+        image->set(pixbuf);
+        button.set_image(*image);
     } catch (const Gdk::PixbufError& ex) {
         std::cerr << "Error loading image: " << ex.what() << std::endl;
     }
 }
 
-void Gui::configureImage(const std::string& filename, Gtk::Image& image) {
+Gtk::Image Gui::configureImage(const std::string& filename) {
+    Gtk::Image image;
     try {
         auto pixbuf = Gdk::Pixbuf::create_from_file(filename);
         image.set(pixbuf);
     } catch (const Gdk::PixbufError& ex) {
         std::cerr << "Error loading image: " << ex.what() << std::endl;
     }
+
+    return image;
 }
 
 Gui::~Gui() {}
