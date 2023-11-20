@@ -11,7 +11,6 @@ Wifibot::Wifibot() :
         m_stop(false),
         m_p_thread(nullptr),
         m_socket() {
-    // Additional constructor logic, if needed
 }
 
 void Wifibot::speed_up(){
