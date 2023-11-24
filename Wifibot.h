@@ -83,7 +83,8 @@ public:
      * @param length longueur de la trame
      * @return valeur du crc
      */
-    unsigned short crc16(const char* trame, unsigned short length);
+//    unsigned short crc16(const char* trame, unsigned short length);
+    short crc16(unsigned char *Adresse_tab , unsigned char Taille_max);
 
     /**
      * permet d'imposer une certaine vitèsse au roue

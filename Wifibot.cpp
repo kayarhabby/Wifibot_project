@@ -2,8 +2,8 @@
 // Created by kaya on 06/11/23.
 //
 
-#include <netinet/in.h>
 #include "Wifibot.h"
+#include <math.h>
 using namespace std;
 
 Wifibot::Wifibot() :
@@ -14,9 +14,11 @@ Wifibot::Wifibot() :
 }
 
 void Wifibot::speed_up(){
+
     m_order.set_Order(m_order.get_order_L() + 5 ,m_order.get_order_R() + 5 );
 }
 void Wifibot::speed_down(){
+
     m_order.set_Order(m_order.get_order_L() - 5,m_order.get_order_R() - 5);
 }
 void Wifibot::turn(int direction) {
@@ -24,6 +26,9 @@ void Wifibot::turn(int direction) {
     // Calculer la consigne pour les deux moteurs (20% des ordres)
     short consigne_L = 0.2 * m_order.get_order_L();
     short consigne_R = 0.2 * m_order.get_order_R();
+
+    int moy_vitesse =  (m_order.get_order_R() + m_order.get_order_L()) / 2;
+    m_order.set_Order(moy_vitesse, moy_vitesse);
 
     if (direction == 1) {
         // Tourner vers la gauche en augmentant la consigne du moteur gauche
@@ -33,9 +38,6 @@ void Wifibot::turn(int direction) {
         m_order.set_Order(m_order.get_order_L() - consigne_L, m_order.get_order_R() + consigne_R);
     }
 
-    int moy_vitesse =  (m_order.get_order_R() + m_order.get_order_L()) / 2;
-
-    m_order.set_Order(moy_vitesse, moy_vitesse);
 }
 
 void Wifibot::rotate (int direction){
@@ -76,22 +78,25 @@ void Wifibot::run() {
     static int cpt = 0;
 
     while (!m_stop) {
-        char trame[9];
+         char* trame = new char[9];
 
         char char1 = 0xFF;
         char char2 = 0x07;
 
-        char char3 = m_order.get_order_L() & 0xFF;
-        char char4 = (m_order.get_order_L() >> 8) & 0xFF;
-        char char5 = m_order.get_order_R() & 0xFF;
-        char char6 = (m_order.get_order_R() >> 8) & 0xFF;
+         char char3 = m_order.get_order_L() & 0xFF;
+         char char4 = (m_order.get_order_L() >> 8) & 0xFF;
+         char char5 = m_order.get_order_R() & 0xFF;
+         char char6 = (m_order.get_order_R() >> 8) & 0xFF;
 
         // Construct char7
-        unsigned char char7 = 0;
-        char7 |= (m_order.get_speed_ctr() ? (1 << 7) : 0);  // Left Side Closed Loop Speed control :: 1 -> ON
-        char7 |= (m_order.get_order_L() ? (1 << 6) : 0);  // Left Side Forward :: 1 -> Forward
-        char7 |= (m_order.get_speed_ctr() ? (1 << 5) : 0);  // Right Side Closed Loop Speed control :: 1 -> ON
-        char7 |= (m_order.get_order_R() ? (1 << 4) : 0);  // Right Side Forward :: 1 -> Forward
+        char char7 = 0;
+        char7 |= (m_order.get_speed_ctr() ? 128 : 0);
+        char7 |= (m_order.get_order_L() > 0 ? 64 : 0);
+        char7 |= (m_order.get_speed_ctr() ? 32 : 0);
+        char7 |= (m_order.get_order_R() > 0 ? 16 : 0);
+        char7 |= (1 << 3);
+        char7 |= (0 << 2);
+        char7 |= (0 << 1);
 
         // Construct chars 8-9 (CRC16)
         trame[0] = char1;
@@ -102,12 +107,12 @@ void Wifibot::run() {
         trame[5] = char6;
         trame[6] = char7;
 
-        unsigned short crc16_value = crc16(trame, 7);  // CRC16 calculation on chars 1-7
-        trame[7] = static_cast<char>(crc16_value & 0xFF);  // Low byte
-        trame[8] = static_cast<char>((crc16_value >> 8) & 0xFF);  // High byte
+        unsigned short crc16_value = crc16(reinterpret_cast<unsigned char*>(trame), 7);
+        trame[7] = static_cast<char>(crc16_value & 0xFF);
+        trame[8] = static_cast<char>((crc16_value >> 8) & 0xFF);
 
         cout << "Thread [send] : " << ++cpt << endl;
-        // Code d'émission de la trame
+        cout << "crc16 " << crc16_value << endl;
         cout << "char1 " << static_cast<int> (char1)<< endl;
         cout << "char2 " << static_cast<int>(char2) << endl;
         cout << "char3 " << static_cast<int>(char3) << endl;
@@ -115,9 +120,10 @@ void Wifibot::run() {
         cout << "char5 " << static_cast<int>(char5) << endl;
         cout << "char6 " << static_cast<int>(char6) << endl;
         cout << "char7 " << static_cast<int>(char7) << endl;
-        cout << "crc16 " << crc16_value << endl;
-        m_socket.send(trame,9);
-        //m_socket.send("Hello World!");
+        m_socket.send(trame, 9);
+
+        delete[] trame;  // Release memory to avoid memory leaks
+
         this_thread::sleep_for(chrono::milliseconds(LOOP_TIME));
     }
 
@@ -125,25 +131,26 @@ void Wifibot::run() {
 }
 
 
-
-// crc16
-
-unsigned short Wifibot::crc16(const char* trame, unsigned short length) {
-    unsigned short crc = 0xFFFF;
-
-    for (unsigned short k = 1; k < length; k++) {
-        char octet = trame[k];
-        crc ^= octet;
-
-        for (int i = 0; i < 8; ++i) {
-            if (crc & 1)
-                crc = (crc >> 1) ^ POLYNOME;
-            else
-                crc >>= 1;
+short Wifibot::crc16(unsigned char *Adresse_tab , unsigned char Taille_max)
+{
+    unsigned int Crc = 0xFFFF;
+    unsigned int Polynome = 0xA001;
+    unsigned int CptOctet = 0;
+    unsigned int CptBit = 0;
+    unsigned int Parity= 0;
+    Crc = 0xFFFF;
+    Polynome = 0xA001;
+    for ( CptOctet= 1 ; CptOctet < Taille_max ; CptOctet++)
+    {
+        Crc ^= *( Adresse_tab + CptOctet);
+        for ( CptBit = 0; CptBit <= 7 ; CptBit++)
+        {
+            Parity= Crc;
+            Crc >>= 1;
+            if (Parity%2 == true) Crc ^= Polynome;
         }
     }
-
-    return crc;
+    return Crc;
 }
 
 void Wifibot::stop() {
